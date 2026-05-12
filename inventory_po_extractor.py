@@ -3,10 +3,14 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+VERSION = "1.0.7"
+
 import openpyxl
 from openpyxl import Workbook
 
 SOURCE = Path(r"C:\Claude Projects\Inventory\InventoryTransactionsF6.xlsx")
+SYNC_SCRIPT = SOURCE.parent / "sync-inventory.ps1"
+TASK_NAME = "SyncInventoryFromSharePoint"
 PO_PATTERN = re.compile(r'[PN][A-Z]*[-.](\d{5,})')
 
 
@@ -37,7 +41,43 @@ def prompt(msg, default=None):
     return val if val else default
 
 
+def setup_scheduled_task():
+    time_str = prompt("Run time [09:00]: ", default="09:00")
+    if not re.fullmatch(r'\d{2}:\d{2}', time_str):
+        print("Invalid time format. Use HH:MM.")
+        sys.exit(1)
+
+    ps_content = f"""\
+$action  = New-ScheduledTaskAction -Execute "powershell.exe" `
+           -Argument '-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "{SYNC_SCRIPT}"'
+$trigger = New-ScheduledTaskTrigger -Daily -At "{time_str}"
+Register-ScheduledTask -TaskName "{TASK_NAME}" -Action $action -Trigger $trigger -Force
+Write-Host "Task '{TASK_NAME}' scheduled daily at {time_str}."
+Read-Host "Press Enter to close"
+"""
+
+    out_path = SOURCE.parent / "setup-task.ps1"
+    out_path.write_text(ps_content, encoding="utf-8")
+
+    print(f"\nScript written to:\n  {out_path}")
+    print("\nRun it as Administrator to create/update the scheduled task:")
+    print(f"  Right-click -> Run with PowerShell")
+
+
 def main():
+    print(f"Inventory PO Extractor v{VERSION}")
+    print()
+    print("1. Search Catalog")
+    print("2. Setup scheduled sync (Task Scheduler)")
+    choice = prompt("\nChoice: ")
+    if choice == "2":
+        setup_scheduled_task()
+        return
+    if choice != "1":
+        print("Invalid choice.")
+        sys.exit(1)
+
+    print()
     catalog = prompt("Catalog: ")
     if not catalog:
         print("Catalog is required.")

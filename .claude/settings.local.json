@@ -2,7 +2,21 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Edit(~/.claude/skills/build-installer/**)",
+      "Read(//c/Users/yoav_bs/.claude/skills/build-exe/scripts/**)",
+      "Edit(~/.claude/skills/build-exe/**)",
+      "Read(//c/Users/yoav_bs/.claude/skills/build-installer/scripts/**)",
+      "Bash(python \"C:\\\\Users\\\\yoav_bs\\\\.claude\\\\skills\\\\build-exe\\\\scripts\\\\build_exe.py\" \"c:\\\\Claude Projects\\\\Inventory\\\\inventory_po_extractor.py\")",
+      "PowerShell(Get-ScheduledTask | Where-Object { $_.TaskName -match 'inventory|sync' -or $_.Description -match 'inventory|sync' } | Format-List TaskName, TaskPath, Description, Author)",
+      "PowerShell(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\" | Get-ScheduledTaskInfo; \\(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\"\\).Actions; \\(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\"\\).Triggers)",
+      "Bash(\"c:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")",
+      "PowerShell(& \"c:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")",
+      "PowerShell(& \"C:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")"
     ]
   }
 }

@@ -1,2 +1,14 @@
+# Excel files
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+
 # Excel temp/lock files
 ~$*
+
+# PyInstaller build artifacts
+dist/
+build/
+*.spec
+*.ico
