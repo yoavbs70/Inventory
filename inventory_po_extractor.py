@@ -1,10 +1,11 @@
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 
-VERSION = "1.0.20"
+VERSION = "1.0.21"
 
 import openpyxl
 from openpyxl import Workbook
@@ -60,16 +61,18 @@ $trigger = New-ScheduledTaskTrigger -Daily -At "{time_str}"
 Register-ScheduledTask -TaskName "{TASK_NAME}" -Action $action -Trigger $trigger -Force
 """
 
-    out_path = SOURCE.parent / "setup-task.ps1"
-    out_path.write_text(ps_content, encoding="utf-8")
+    tmp = Path(tempfile.mktemp(suffix=".ps1"))
+    tmp.write_text(ps_content, encoding="utf-8")
 
     print("\nA UAC prompt will appear — click Yes to allow task creation.")
 
     subprocess.run(
         ["powershell.exe", "-Command",
-         f'Start-Process powershell -Verb RunAs -Wait -ArgumentList \'-ExecutionPolicy Bypass -File "{out_path}"\''],
+         f'Start-Process powershell -Verb RunAs -Wait -ArgumentList \'-ExecutionPolicy Bypass -File "{tmp}"\''],
         check=False,
     )
+
+    tmp.unlink(missing_ok=True)
 
     check = subprocess.run(
         ["schtasks", "/query", "/tn", TASK_NAME],
@@ -78,8 +81,7 @@ Register-ScheduledTask -TaskName "{TASK_NAME}" -Action $action -Trigger $trigger
     if check.returncode == 0:
         print(f"\nDone. Task '{TASK_NAME}' scheduled daily at {time_str}.")
     else:
-        print(f"\nTask creation may have failed or was cancelled.")
-        print(f"To retry manually, right-click and run as Administrator:\n  {out_path}")
+        print(f"\nTask creation may have failed or was cancelled. Please try again.")
 
 
 def main():
