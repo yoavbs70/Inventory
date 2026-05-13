@@ -1,15 +1,21 @@
 import re
+import subprocess
 import sys
 from datetime import date, datetime
 from pathlib import Path
 
-VERSION = "1.0.7"
+VERSION = "1.0.20"
 
 import openpyxl
 from openpyxl import Workbook
 
-SOURCE = Path(r"C:\Claude Projects\Inventory\InventoryTransactionsF6.xlsx")
-SYNC_SCRIPT = SOURCE.parent / "sync-inventory.ps1"
+if getattr(sys, 'frozen', False):
+    _BASE = Path(sys.executable).parent
+else:
+    _BASE = Path(__file__).parent
+
+SOURCE = _BASE / "InventoryTransactionsF6.xlsx"
+SYNC_SCRIPT = _BASE / "sync-inventory.ps1"
 TASK_NAME = "SyncInventoryFromSharePoint"
 PO_PATTERN = re.compile(r'[PN][A-Z]*[-.](\d{5,})')
 
@@ -52,16 +58,28 @@ $action  = New-ScheduledTaskAction -Execute "powershell.exe" `
            -Argument '-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "{SYNC_SCRIPT}"'
 $trigger = New-ScheduledTaskTrigger -Daily -At "{time_str}"
 Register-ScheduledTask -TaskName "{TASK_NAME}" -Action $action -Trigger $trigger -Force
-Write-Host "Task '{TASK_NAME}' scheduled daily at {time_str}."
-Read-Host "Press Enter to close"
 """
 
     out_path = SOURCE.parent / "setup-task.ps1"
     out_path.write_text(ps_content, encoding="utf-8")
 
-    print(f"\nScript written to:\n  {out_path}")
-    print("\nRun it as Administrator to create/update the scheduled task:")
-    print(f"  Right-click -> Run with PowerShell")
+    print("\nA UAC prompt will appear — click Yes to allow task creation.")
+
+    subprocess.run(
+        ["powershell.exe", "-Command",
+         f'Start-Process powershell -Verb RunAs -Wait -ArgumentList \'-ExecutionPolicy Bypass -File "{out_path}"\''],
+        check=False,
+    )
+
+    check = subprocess.run(
+        ["schtasks", "/query", "/tn", TASK_NAME],
+        capture_output=True, text=True,
+    )
+    if check.returncode == 0:
+        print(f"\nDone. Task '{TASK_NAME}' scheduled daily at {time_str}.")
+    else:
+        print(f"\nTask creation may have failed or was cancelled.")
+        print(f"To retry manually, right-click and run as Administrator:\n  {out_path}")
 
 
 def main():

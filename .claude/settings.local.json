@@ -16,7 +16,10 @@
       "PowerShell(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\" | Get-ScheduledTaskInfo; \\(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\"\\).Actions; \\(Get-ScheduledTask -TaskName \"SyncInventoryFromSharePoint\"\\).Triggers)",
       "Bash(\"c:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")",
       "PowerShell(& \"c:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")",
-      "PowerShell(& \"C:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")"
+      "PowerShell(& \"C:\\\\Claude Projects\\\\Inventory\\\\dist\\\\inventory_po_extractor.exe\")",
+      "Read(//c/Users/yoav_bs/.claude/skills/build-installer/**)",
+      "Bash(ls \"c:\\\\Claude Projects\")",
+      "Read(//c/Claude Projects/**)"
     ]
   }
 }
